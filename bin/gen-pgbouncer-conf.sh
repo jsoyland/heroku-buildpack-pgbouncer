@@ -11,6 +11,11 @@ if [ -z "${SERVER_RESET_QUERY}" ] &&  [ "$POOL_MODE" == "session" ]; then
   SERVER_RESET_QUERY="DISCARD ALL;"
 fi
 
+# Create keyfiles for server-side pgbouncer
+echo "$PGSSLCERT_CONTENTS" > /app/vendor/pgbouncer/postgresql.crt
+echo "$PGSSLKEY_CONTENTS" > /app/vendor/pgbouncer/postgresql.key
+echo "$PGSSLROOTCERT_CONTENTS" > /app/vendor/pgbouncer/root.crt
+
 cat >> /app/vendor/pgbouncer/pgbouncer.ini << EOFEOF
 [pgbouncer]
 listen_addr = 127.0.0.1
@@ -40,6 +45,9 @@ log_pooler_errors = ${PGBOUNCER_LOG_POOLER_ERRORS:-1}
 stats_period = ${PGBOUNCER_STATS_PERIOD:-60}
 ignore_startup_parameters = ${PGBOUNCER_IGNORE_STARTUP_PARAMETERS}
 query_wait_timeout = ${PGBOUNCER_QUERY_WAIT_TIMEOUT:-120}
+server_tls_ca_file = /app/vendor/pgbouncer/root.crt
+server_tls_key_file = /app/vendor/pgbouncer/postgresql.key
+server_tls_cert_file = /app/vendor/pgbouncer/postgresql.crt
 
 [databases]
 EOFEOF
